@@ -92,8 +92,8 @@ void update(ll a, ll b, ll c){
         seg.update(1,1,n,in[st],in[a],c);
         a = par[st];
     }
-    if(in[a]>in[b]) swap(a,b);
-    seg.update(1,1,n,in[a]+1,in[b],c);
+    if(dep[a]>dep[b]) swap(a,b);
+    seg.update(1,1,n,in[a],in[b],c);
 }
 
 ll query(ll a, ll b){
@@ -104,8 +104,8 @@ ll query(ll a, ll b){
         ret += seg.query(1,1,n,in[st],in[a]);
         a = par[st];
     }
-    if(in[a]>in[b]) swap(a,b);
-    ret += query(1,1,n,in[a]+1,in[b]);
+    if(dep[a]>dep[b]) swap(a,b);
+    ret += query(1,1,n,in[a],in[b]);
     return ret;
 }
 
