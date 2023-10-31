@@ -13,7 +13,7 @@ typedef pair<double,double> pdd;
 #define MAX 500010
 #define SIZE 100010
 
-const int N = 1e5+10LL;
+const int N = 5e5+10LL;
 
 struct PST{
     #define lc t[cur].l
@@ -53,38 +53,67 @@ struct PST{
         return cur;
     }
 
-    int query(int pre, int cur, int s, int e, int k){
+    ll psum(int cur, int s, int e, int l, int r){
+        if(r<s||l>e) return 0;
+        if(l<=s&&e<=r) return t[cur].val;
+        ll m = (s+e)>>1;
+        return psum(lc,s,m,l,r)+psum(rc,m+1,e,l,r);
+    }
+
+    ll sum(int pre, int cur, int s, int e, int l, int r){
+        return psum(cur,s,e,l,r)-psum(pre,s,e,l,r);
+    }
+
+    int kth(int pre, int cur, int s, int e, int k){
         if(s==e) return s;
         int cnt = t[lc].val-t[t[pre].l].val;
         ll m = (s+e)>>1;
-        if(cnt>=k) return query(t[pre].l,lc,s,m,k);
-        else return query(t[pre].r,rc,m+1,e,k-cnt);
+        if(cnt>=k) return kth(t[pre].l,lc,s,m,k);
+        else return kth(t[pre].r,rc,m+1,e,k-cnt);
+    }
+
+    ll query(int pre, int cur, int s, int e, ll x){
+        if(s==e) return s;
+        int lcnt = t[lc].val-t[t[pre].l].val;
+        int rcnt = t[rc].val-t[t[pre].r].val;
+        ll m = (s+e)>>1, bit = (e-s+1)/2;
+        if((x&bit)&&lcnt==0) return query(t[pre].r,rc,m+1,e,x);
+        if(!(x&bit)&&rcnt!=0) return query(t[pre].r,rc,m+1,e,x);
+        return query(t[pre].l,lc,s,m,x);
     }
 };
 
 PST t;
 ll a[N], root[N], b[N];
+ll n = 524287;
 
 int main(){
     fastio;
-    map<ll,ll> mp;
-    ll n,q; cin >> n >> q;
-    for(int i=1;i<=n;i++){
-        cin >> a[i];
-        mp[a[i]] = 0;
-    }
-    ll c = 0;
-    for(auto i:mp){
-        mp[i.ff] = ++c;
-        b[c] = i.ff;
-    }
-    root[0] = t.build(1,n);
-    for(int i=1;i<=n;i++){
-        root[i] = t.upd(root[i-1],1,n,mp[a[i]],1);
-    }
+    ll q,cur=0; cin >> q;
+    root[0] = t.build(0,n);
     while(q--){
-        ll l,r,k;
-        cin >> l >> r >> k;
-        cout << b[t.query(root[l-1],root[r],1,n,k)] << "\n";
+        ll tp; cin >> tp;
+        if(tp==1){
+            ll x; cin >> x;
+            root[cur+1] = t.upd(root[cur],0,n,x,1);
+            ++cur;
+        }
+        else if(tp==2){
+            ll l,r,x; cin >> l >> r >> x;
+            cout << t.query(root[l-1],root[r],0,n,x) << "\n";
+        }
+        else if(tp==3){
+            ll k; cin >> k;
+            cur -= k;
+        }
+        else if(tp==4){
+            ll l,r,x; cin >> l >> r >> x;
+            cout << t.sum(root[l-1],root[r],0,n,1,x) << "\n";
+        }
+        else{
+            ll l,r,k; cin >> l >> r >> k;
+            cout << t.kth(root[l-1],root[r],0,n,k) << "\n";
+        }
     }
 }
+// boj 13538
