@@ -34,7 +34,7 @@ void dfs(int x, int p = 0, ll d = 0){
 ll lca(ll u, ll v){
     if(dep[u]<dep[v]) swap(u,v);
     for(int k=19;k>=0;k--){
-        if(dep[par[u][k]]>dep[v]) u = par[u][k];
+        if(dep[par[u][k]]>=dep[v]) u = par[u][k];
     }
     if(u==v) return u;
     for(int k=19;k>=0;k--){
