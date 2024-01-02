@@ -38,7 +38,7 @@ ll lca(ll u, ll v){
     }
     if(u==v) return u;
     for(int k=19;k>=0;k--){
-        iF(par[u][k]!=par[v][k]) u = par[u][k], v = par[v][k];
+        if(par[u][k]!=par[v][k]) u = par[u][k], v = par[v][k];
     }
     return par[u][0];
 }
