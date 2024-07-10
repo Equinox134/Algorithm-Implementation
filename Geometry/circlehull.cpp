@@ -10,6 +10,7 @@ typedef pair<double,double> pdd;
 #define ff first
 #define ss second
 #define INF 987654321
+#define eps (1e-11)
 #define MAX 200010
 #define SIZE 100010
  
@@ -22,10 +23,10 @@ const double PI2 = PI/2;
 const double PI3 = PI*3/2;
  
 struct Circle{
-	ll x,y,r;
+	double x,y,r;
 	ll idx,aidx;
 	Circle(){}
-	Circle(ll x, ll y, ll r, ll idx, ll aidx): x(x), y(y), r(r), idx(idx), aidx(aidx) {}
+	Circle(double x, double y, double r, ll idx, ll aidx): x(x), y(y), r(r), idx(idx), aidx(aidx) {}
 	bool operator < (const Circle&C) const {
 		if(y+r!=C.y+C.r) return y+r>C.y+C.r;
 		if(y!=C.y) return y>C.y;
@@ -49,7 +50,6 @@ typedef vector<Circle> VC;
  
 int ccw(pdd a, pdd b, pdd c){
 	double k = (b.ff-a.ff)*(c.ss-a.ss)-(c.ff-a.ff)*(b.ss-a.ss);
-	if(abs(k)<=1e-10) k = 0;
 	return (k>0)-(k<0);
 }
  
@@ -83,6 +83,7 @@ bool dom(SupLine p, SupLine q){
 	double x1 = c1.x+c1.r*sn1, y1 = c1.y+c1.r*cs1;
 	double x2 = c2.x+c2.r*sn1, y2 = c2.y+c2.r*cs1;
 	double nx = x1+cs1, ny = y1-sn1;
+	
 	int k = ccw({nx,ny},{x1,y1},{x2,y2});
 	return k>=0;
 }
@@ -127,9 +128,6 @@ void Advance(vector<ll> &S, vector<ll> &X, vector<ll> &Y, Circle x, Circle y){
 	if(ls1.th>500) a2 = 1000; if(ls1.th<-500) a2 = 2000;
 	if(ls2.th>500) a3 = 1000; if(ls2.th<-500) a3 = 2000;
 	
-//	cout << x.aidx << " " << y.aidx << "\n";
-//	cout << r2d(a1) << " " << r2d(a2) << " " << r2d(a3) << " " << r2d(a4) << "\n";
-	
 	if(l1.th>=0){
 		if(a1<a2&&a1<a3){
 			add(S,y.idx,szs);
@@ -143,12 +141,18 @@ void Advance(vector<ll> &S, vector<ll> &X, vector<ll> &Y, Circle x, Circle y){
 	
 	if(a2<a3){
 		if(ls1.th>500) Ls = {x,Ls.th};
-		else Ls = ls1;
+		else {
+            Ls = ls1;
+            Ls.th -= eps;
+		}
 		cx = (cx+1)%sx;
 	}
 	else{
 		if(ls2.th>500) Ls = {y,Ls.th};
-		else Ls = ls2;
+		else {
+            Ls = ls2;
+            Ls.th -= eps;
+		}
 		cy = (cy+1)%sy;
 	}
 }
@@ -161,21 +165,17 @@ vector<ll> Merge(ll s, ll e){
 	}
 	ll m = (s+e)>>1;
 	P = Merge(s,m); Q = Merge(m+1,e);
-	//cout << s << " " << e << "\n";
-	Ls = {Circle(),0};
-	SupLine Lp = {inp[P[0]],0}, Lq = {inp[Q[0]],0};
+	Ls = {Circle(),-eps};
+	SupLine Lp = {inp[P[0]],-eps}, Lq = {inp[Q[0]],-eps};
 	ll sz = 0; 
 	ll sp = P.size(), sq = Q.size();
 	ll curp = 0, curq = 0, iter = 0;
-	
-//	for(auto i:P)cout << inp[i].aidx << " "; cout << "\n";
-//	for(auto i:Q)cout << inp[i].aidx << " "; cout << "\n";
 	
 	while(1){
 		++iter;
 		f = false;
 		Circle p = inp[P[curp]], q = inp[Q[curq]];
-		if(dom(Lp,Lq)){
+		if(dom(Lp,Lq)){ 
 			add(S,p.idx,sz);
 			if(sz>=4&&S[0]==S[sz-2]&&S[1]==S[sz-1]) break;
 			sx = sp; sy = sq; cx = curp; cy = curq; szs = sz;
@@ -194,19 +194,12 @@ vector<ll> Merge(ll s, ll e){
 		Lp = {p,Ls.th}; Lq = {q,Ls.th};
 		if(iter>=2*(sp+sq)) break;
 		if(f||sz>=4&&S[0]==S[sz-2]&&S[1]==S[sz-1]) break;
-		//for(auto i:S) cout << inp[i].aidx << " "; cout << "\n";
 	}
 	if(sz>=4&&S[0]==S[sz-2]&&S[1]==S[sz-1]){
 		S.pop_back(); S.pop_back();
 		sz -= 2;
 	}
-//	int flag = 0;
-//	for(auto i:S){
-//		cout << inp[i].aidx << " ";
-//		if(inp[i].aidx==45946) flag = 1;
-//	}
-//	cout << "\n\n";
-	//if(cnt>210000) cout << cnt,exit(0);
+	
 	return S;
 }
  
@@ -217,7 +210,7 @@ void solve(){
 	ll n; cin >> n;
 	VC chS;
 	for(int i=0;i<n;i++){
-		ll x,y,r; cin >> x >> y >> r;
+		double x,y,r; cin >> x >> y >> r;
 		inp.push_back(Circle(x,y,r,0,i));
 	}
  
@@ -228,7 +221,6 @@ void solve(){
 	if(res.size()>1) res.push_back(res[0]);
 	for(auto i:res) chS.push_back(inp[i]);
 	reverse(all(chS));
-	//for(auto i:chS) cout << i.aidx << " "; cout << "\n";
 	chS.pop_back();
 	ll sz = chS.size();
 	double ang = 0, ans = 0;
@@ -239,7 +231,6 @@ void solve(){
 		double t1 = acos((a.r-b.r)/d);
 		double t2 = atan2(b.y-a.y,b.x-a.x);
 		double na = t2-PI2-t1;
-		//cout << norm(2*PI) << "\n";
 		na = norm(na);
 		if(na<ang&&na==0) na = 2*PI;
 		ans += a.r*(na-ang);
@@ -257,4 +248,3 @@ int main(){
 	cout.precision(10);
 	for(auto i:va) cout << fixed << i << "\n";
 }
-//https://www.acmicpc.net/problem/27957
