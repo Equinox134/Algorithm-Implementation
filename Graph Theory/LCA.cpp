@@ -23,7 +23,7 @@ void dfs(int x, int p = 0, ll d = 0){
     for(int i=1;i<20;i++){
         par[x][i] = par[par[x][i-1]][i-1];
     }
-    for(int i:g[x]){
+    for(auto i:g[x]){
         ll nx = i.ff, w = i.ss;
         if(nx!=p){
             dfs(nx,x,d+w);
